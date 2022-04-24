@@ -391,7 +391,7 @@ struct PandaState @0xa7649e2575e4591e {
   pandaType @10 :PandaType;
   ignitionCan @13 :Bool;
   safetyModel @14 :Car.CarParams.SafetyModel;
-  safetyParam @20 :Int16;
+  safetyParam @26 :UInt32;
   alternativeExperience @23 :Int16;
   faultStatus @15 :FaultStatus;
   powerSaveEnabled @16 :Bool;
@@ -458,6 +458,7 @@ struct PandaState @0xa7649e2575e4591e {
   hasGpsDEPRECATED @6 :Bool;
   fanSpeedRpmDEPRECATED @11 :UInt16;
   usbPowerModeDEPRECATED @12 :PeripheralState.UsbPowerMode;
+  safetyParamDEPRECATED @20 :Int16;
 }
 
 struct PeripheralState {
@@ -636,7 +637,7 @@ struct ControlsState @0x97ff69c53601abf1 {
     saturated @8 :Bool;
     steeringAngleDesiredDeg @9 :Float32;
    }
-  
+
   struct LateralTorqueState {
     active @0 :Bool;
     error @1 :Float32;
@@ -1748,6 +1749,14 @@ struct NavRoute {
   }
 }
 
+struct EncodeData {
+  data @0 :Data;
+  timestampEof @1 :Int64;
+  idx @2 :UInt32;
+  segmentNum @3 :Int32;
+  flags @4 :UInt32;
+}
+
 struct Event {
   logMonoTime @0 :UInt64;  # nanoseconds
   valid @67 :Bool = true;
@@ -1814,6 +1823,10 @@ struct Event {
 
     # *********** debug ***********
     testJoystick @52 :Joystick;
+    roadEncodeData @86 :EncodeData;
+    driverEncodeData @87 :EncodeData;
+    wideRoadEncodeData @88 :EncodeData;
+    qRoadEncodeData @89 :EncodeData;
 
     # *********** legacy + deprecated ***********
     model @9 :Legacy.ModelData; # TODO: rename modelV2 and mark this as deprecated
