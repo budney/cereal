@@ -394,7 +394,7 @@ struct PandaState @0xa7649e2575e4591e {
   pandaType @10 :PandaType;
   ignitionCan @13 :Bool;
   safetyModel @14 :Car.CarParams.SafetyModel;
-  safetyParam @26 :UInt32;
+  safetyParam @27 :UInt16;
   alternativeExperience @23 :Int16;
   faultStatus @15 :FaultStatus;
   powerSaveEnabled @16 :Bool;
@@ -462,6 +462,7 @@ struct PandaState @0xa7649e2575e4591e {
   fanSpeedRpmDEPRECATED @11 :UInt16;
   usbPowerModeDEPRECATED @12 :PeripheralState.UsbPowerMode;
   safetyParamDEPRECATED @20 :Int16;
+  safetyParam2DEPRECATED @26 :UInt32;
 }
 
 struct PeripheralState {
@@ -1068,6 +1069,36 @@ struct ProcLog {
     active @5 :UInt64;
     inactive @6 :UInt64;
     shared @7 :UInt64;
+  }
+}
+
+struct GnssMeasurements {
+  # Position in lat,long,alt for debugging purposes.
+  # Latitude and longitude in degrees. Altitude In meters above the WGS 84 reference ellipsoid.
+  position @0 :List(Float64);
+  # Todo sync this with timing pulse of ublox
+  ubloxMonoTime @1 :UInt64;
+  correctedMeasurements @2 :List(CorrectedMeasurement);
+
+  struct CorrectedMeasurement {
+    # nmeaId used for debugging
+    nmeaId @0 :UInt8;
+    gnssId @1 :GnssId;
+    # Can be 0 if not Glonass measurement.
+    glonassFrequency @2 :Int8;
+    pseudorange @3 :Float64;
+    pseudorangeStd @4 :Float64;
+    pseudorangeRate @5 :Float64;
+    pseudorangeRateStd @6 :Float64;
+    # Satellite position and velocity [x,y,z]
+    satPos @7 :List(Float64);
+    satVel @8 :List(Float64);
+  }
+
+  enum GnssId {
+      gps @0;
+      glonass @1;
+      # other ids are not yet supported
   }
 }
 
@@ -1794,6 +1825,7 @@ struct Event {
     ubloxRaw @39 :Data;
     qcomGnss @31 :QcomGnss;
     gpsLocationExternal @48 :GpsLocationData;
+    gnssMeasurements @91 :GnssMeasurements;
     driverState @59 :DriverState;
     liveParameters @61 :LiveParametersData;
     cameraOdometry @63 :CameraOdometry;
