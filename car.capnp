@@ -573,8 +573,9 @@ struct CarParams {
     stellantis @25;
     faw @26;
     body @27;
-    subaruGen2 @28;
-    subaruHybrid @29;
+    hyundaiHDA2 @28;
+    subaruGen2 @29;
+    subaruHybrid @30;
   }
 
   enum SteerControlType {
