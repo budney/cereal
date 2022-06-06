@@ -568,8 +568,6 @@ struct ControlsState @0x97ff69c53601abf1 {
   ufAccelCmd @33 :Float32;
   aTarget @35 :Float32;
   curvature @37 :Float32;  # path curvature from vehicle model
-  desiredCurvature @61 :Float32;  # lag adjusted curvatures used by lateral controllers
-  desiredCurvatureRate @62 :Float32;
   forceDecel @51 :Bool;
 
   # UI alerts
@@ -1077,15 +1075,12 @@ struct ProcLog {
 }
 
 struct GnssMeasurements {
-  ubloxMonoTime @0 :UInt64;
-  correctedMeasurements @1 :List(CorrectedMeasurement);
-
-  positionECEF @2 :Measurement;
-  velocityECEF @3 :Measurement;
-  # todo add accuracy of position?
-  # Represents heading in degrees.
-  bearingDeg @4 :Measurement;
+  # Position in lat,long,alt for debugging purposes.
+  # Latitude and longitude in degrees. Altitude In meters above the WGS 84 reference ellipsoid.
+  position @0 :List(Float64);
   # Todo sync this with timing pulse of ublox
+  ubloxMonoTime @1 :UInt64;
+  correctedMeasurements @2 :List(CorrectedMeasurement);
 
   struct CorrectedMeasurement {
     constellationId @0 :ConstellationId;
@@ -1110,12 +1105,6 @@ struct GnssMeasurements {
       imes @4;
       qznss @5;
       glonass @6;
-  }
-
-  struct Measurement {
-    value @0 : List(Float64);
-    std @1 : Float64;
-    valid @2 : Bool;
   }
 }
 
@@ -1809,7 +1798,6 @@ struct EncodeData {
   idx @0 :EncodeIndex;
   data @1 :Data;
   header @2 :Data;
-  unixTimestampNanos @3 :UInt64;
 }
 
 struct Event {
