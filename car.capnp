@@ -17,7 +17,8 @@ struct CarEvent @0x9b1657f34caf3ad3 {
   immediateDisable @6 :Bool;
   preEnable @7 :Bool;
   permanent @8 :Bool; # alerts presented regardless of openpilot state
-  override @9 :Bool;
+  overrideLateral @10 :Bool;
+  overrideLongitudinal @9 :Bool;
 
   enum EventName @0xbaa8c5d505f727de {
     canError @0;
@@ -35,6 +36,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     pedalPressed @13;  # exits active state
     pedalPressedPreEnable @73;  # added during pre-enable state for either pedal
     gasPressedOverride @108;  # added when user is pressing gas with no disengage on gas
+    steerOverride @114;
     cruiseDisabled @14;
     speedTooLow @17;
     outOfSpace @18;
@@ -505,6 +507,8 @@ struct CarParams {
     friction @3 :Float32;
     kf @4 :Float32;
     steeringAngleDeadzoneDeg @5 :Float32;
+    latAccelFactor @6 :Float32;
+    latAccelOffset @7 :Float32;
   }
 
   struct LongitudinalPIDTuning {
@@ -615,6 +619,8 @@ struct CarParams {
     gateway @10; # can gateway
     hud @11; # heads up display
     combinationMeter @12; # instrument cluster
+    electricBrakeBooster @15;
+    adas @19;
 
     # Toyota only
     dsu @6;
@@ -623,7 +629,6 @@ struct CarParams {
     # Honda only
     vsa @13; # Vehicle Stability Assist
     programmedFuelInjection @14;
-    electricBrakeBooster @15;
     shiftByWire @16;
 
     # Chrysler only
