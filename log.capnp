@@ -46,6 +46,7 @@ struct InitData {
     chffrIos @3;
     tici @4;
     pc @5;
+    tizi @6;
   }
 
   struct PandaInfo {
@@ -139,16 +140,6 @@ struct FrameData {
   targetGreyFraction @22 :Float32;
   exposureValPercent @27 :Float32;
 
-  # Focus
-  lensPos @11 :Int32;
-  lensSag @12 :Float32;
-  lensErr @13 :Float32;
-  lensTruePos @14 :Float32;
-  focusVal @16 :List(Int16);
-  focusConf @17 :List(UInt8);
-  sharpnessScore @18 :List(UInt16);
-  recoverState @19 :Int32;
-
   transform @10 :List(Float32);
 
   image @6 :Data;
@@ -165,12 +156,20 @@ struct FrameData {
   sensor @26 :ImageSensor;
   enum ImageSensor {
     unknown @0;
-    ar0321 @1;
+    ar0231 @1;
     ox03c10 @2;
   }
 
   globalGainDEPRECATED @5 :Int32;
   androidCaptureResultDEPRECATED @9 :AndroidCaptureResult;
+  lensPosDEPRECATED @11 :Int32;
+  lensSagDEPRECATED @12 :Float32;
+  lensErrDEPRECATED @13 :Float32;
+  lensTruePosDEPRECATED @14 :Float32;
+  focusValDEPRECATED @16 :List(Int16);
+  focusConfDEPRECATED @17 :List(UInt8);
+  sharpnessScoreDEPRECATED @18 :List(UInt16);
+  recoverStateDEPRECATED @19 :Int32;
   struct AndroidCaptureResult {
     sensitivity @0 :Int32;
     frameDuration @1 :Int64;
@@ -413,6 +412,26 @@ struct PandaState @0xa7649e2575e4591e {
   heartbeatLost @22 :Bool;
   interruptLoad @25 :Float32;
   fanPower @28 :UInt8;
+  fanStallCount @34 :UInt8;
+
+  spiChecksumErrorCount @33 :UInt16;
+
+  # can health
+  canState0 @29 :PandaCanState;
+  canState1 @30 :PandaCanState;
+  canState2 @31 :PandaCanState;
+
+  # safety stuff
+  controlsAllowed @3 :Bool;
+  safetyRxInvalid @19 :UInt32;
+  safetyTxBlocked @24 :UInt32;
+  safetyModel @14 :Car.CarParams.SafetyModel;
+  safetyParam @27 :UInt16;
+  alternativeExperience @23 :Int16;
+  safetyRxChecksInvalid @32 :Bool;
+
+  voltage @0 :UInt32;
+  current @1 :UInt32;
 
   # can health
   canState0 @29 :PandaCanState;
@@ -460,6 +479,8 @@ struct PandaState @0xa7649e2575e4591e {
     interruptRateExti @22;
     interruptRateSpi @23;
     interruptRateUart7 @24;
+    sirenMalfunction @25;
+    heartbeatLoopWatchdog @26;
     # Update max fault type in boardd when adding faults
   }
 
@@ -482,9 +503,42 @@ struct PandaState @0xa7649e2575e4591e {
     flipped @2;
   }
 
+  struct PandaCanState {
+    busOff @0 :Bool;
+    busOffCnt @1 :UInt32;
+    errorWarning @2 :Bool;
+    errorPassive @3 :Bool;
+    lastError @4 :LecErrorCode;
+    lastStoredError @5 :LecErrorCode;
+    lastDataError @6 :LecErrorCode;
+    lastDataStoredError @7 :LecErrorCode;
+    receiveErrorCnt @8 :UInt8;
+    transmitErrorCnt @9 :UInt8;
+    totalErrorCnt @10 :UInt32;
+    totalTxLostCnt @11 :UInt32;
+    totalRxLostCnt @12 :UInt32;
+    totalTxCnt @13 :UInt32;
+    totalRxCnt @14 :UInt32;
+    totalFwdCnt @15 :UInt32;
+    canSpeed @16 :UInt16;
+    canDataSpeed @17 :UInt16;
+    canfdEnabled @18 :Bool;
+    brsEnabled @19 :Bool;
+    canfdNonIso @20 :Bool;
+
+    enum LecErrorCode {
+      noError @0;
+      stuffError @1;
+      formError @2;
+      ackError @3;
+      bit1Error @4;
+      bit0Error @5;
+      crcError @6;
+      noChange @7;
+    }
+  }
+
   startedSignalDetectedDEPRECATED @5 :Bool;
-  voltageDEPRECATED @0 :UInt32;
-  currentDEPRECATED @1 :UInt32;
   hasGpsDEPRECATED @6 :Bool;
   fanSpeedRpmDEPRECATED @11 :UInt16;
   usbPowerModeDEPRECATED @12 :PeripheralState.UsbPowerModeDEPRECATED;
@@ -543,7 +597,6 @@ struct PeripheralState {
 }
 
 struct RadarState @0x9a185389d6fdd05f {
-  canMonoTimes @10 :List(UInt64);
   mdMonoTime @6 :UInt64;
   carStateMonoTime @11 :UInt64;
   radarErrors @12 :List(Car.RadarData.Error);
@@ -578,6 +631,7 @@ struct RadarState @0x9a185389d6fdd05f {
   calStatusDEPRECATED @2 :Int8;
   calCycleDEPRECATED @8 :Int32;
   calPercDEPRECATED @9 :Int8;
+  canMonoTimesDEPRECATED @10 :List(UInt64);
 }
 
 struct LiveCalibrationData {
@@ -614,7 +668,6 @@ struct LiveTracks {
 
 struct ControlsState @0x97ff69c53601abf1 {
   startMonoTime @48 :UInt64;
-  canMonoTimes @21 :List(UInt64);
   longitudinalPlanMonoTime @28 :UInt64;
   lateralPlanMonoTime @50 :UInt64;
 
@@ -792,6 +845,18 @@ struct ControlsState @0x97ff69c53601abf1 {
   jerkFactorDEPRECATED @12 :Float32;
   steerOverrideDEPRECATED @20 :Bool;
   steeringAngleDesiredDegDEPRECATED @29 :Float32;
+  canMonoTimesDEPRECATED @21 :List(UInt64);
+}
+
+# All SI units and in device frame
+struct XYZTData @0xc3cbae1fd505ae80 {
+  x @0 :List(Float32);
+  y @1 :List(Float32);
+  z @2 :List(Float32);
+  t @3 :List(Float32);
+  xStd @4 :List(Float32);
+  yStd @5 :List(Float32);
+  zStd @6 :List(Float32);
 }
 
 struct ModelDataV2 {
@@ -827,16 +892,6 @@ struct ModelDataV2 {
   # Model perceived motion
   temporalPose @21 :Pose;
 
-  # All SI units and in device frame
-  struct XYZTData {
-    x @0 :List(Float32);
-    y @1 :List(Float32);
-    z @2 :List(Float32);
-    t @3 :List(Float32);
-    xStd @4 :List(Float32);
-    yStd @5 :List(Float32);
-    zStd @6 :List(Float32);
-  }
 
   struct LeadDataV2 {
     prob @0 :Float32; # probability that car is your lead at time t
@@ -995,6 +1050,11 @@ struct LongitudinalPlan @0xe00b5b3eba12876c {
     y @1 :List(Float32);
   }
 }
+struct UiPlan {
+  frameId @2 :UInt32;
+  position @0 :XYZTData;
+  accel @1 :List(Float32);
+}
 
 struct LateralPlan @0xe1e9318e2ae8b51e {
   modelMonoTime @31 :UInt64;
@@ -1100,6 +1160,7 @@ struct LiveLocationKalman {
   deviceStable @22 :Bool = true;
   timeSinceReset @23 :Float64;
   excessiveResets @24 :Bool;
+  timeToFirstFix @25 :Float32;
 
   enum Status {
     uninitialized @0;
@@ -1172,12 +1233,21 @@ struct GnssMeasurements {
   gpsTimeOfWeek @2 :Float64;
 
   correctedMeasurements @3 :List(CorrectedMeasurement);
+  ephemerisStatuses @9 :List(EphemerisStatus);
 
   kalmanPositionECEF @4 :LiveLocationKalman.Measurement;
   kalmanVelocityECEF @5 :LiveLocationKalman.Measurement;
   positionECEF @6 :LiveLocationKalman.Measurement;
   velocityECEF @7 :LiveLocationKalman.Measurement;
+  timeToFirstFix @8 :Float32;
   # Todo sync this with timing pulse of ublox
+
+  struct EphemerisStatus {
+    constellationId @0 :ConstellationId;
+    svId @1 :UInt8;
+    type @2 :EphemerisType;
+    source @3 :EphemerisSource;
+  }
 
   struct CorrectedMeasurement {
     constellationId @0 :ConstellationId;
@@ -1191,11 +1261,11 @@ struct GnssMeasurements {
     # Satellite position and velocity [x,y,z]
     satPos @7 :List(Float64);
     satVel @8 :List(Float64);
-    ephemerisSource @9 :EphemerisSource;
+    ephemerisSourceDEPRECATED @9 :EphemerisSourceDEPRECATED;
   }
 
-  struct EphemerisSource {
-    type @0 :EphemerisSourceType;
+  struct EphemerisSourceDEPRECATED {
+    type @0 :EphemerisType;
     # first epoch in file:
     gpsWeek @1 :Int16; # -1 if Nav
     gpsTimeOfWeek @2 :Int32; # -1 if Nav. Integer for seconds is good enough for logs.
@@ -1212,12 +1282,19 @@ struct GnssMeasurements {
     glonass @6;
   }
 
-  enum EphemerisSourceType {
+  enum EphemerisType {
     nav @0;
     # Different ultra-rapid files:
     nasaUltraRapid @1;
     glonassIacUltraRapid @2;
     qcom @3;
+  }
+
+  enum EphemerisSource {
+    gnssChip @0;
+    internet @1;
+    cache @2;
+    unknown @3;
   }
 }
 
@@ -1228,6 +1305,20 @@ struct UbloxGnss {
     ionoData @2 :IonoData;
     hwStatus @3 :HwStatus;
     hwStatus2 @4 :HwStatus2;
+    glonassEphemeris @5 :GlonassEphemeris;
+    satReport @6 :SatReport;
+  }
+
+  struct SatReport {
+    #received time of week in gps time in seconds and gps week
+    iTow @0 :UInt32;
+    svs @1 :List(SatInfo);
+
+    struct SatInfo {
+      svId @0 :UInt8;
+      gnssId @1 :UInt8;
+      flagsBitfield @2 :UInt32;
+    }
   }
 
   struct MeasurementReport {
@@ -1321,7 +1412,7 @@ struct UbloxGnss {
 
     iDot @26 :Float64;
     codesL2 @27 :Float64;
-    gpsWeek @28 :Float64;
+    gpsWeekDEPRECATED @28 :Float64;
     l2 @29 :Float64;
 
     svAcc @30 :Float64;
@@ -1338,6 +1429,9 @@ struct UbloxGnss {
     ionoAlpha @38 :List(Float64);
     ionoBeta @39 :List(Float64);
 
+    towCount @40 :UInt32;
+    toeWeek @41 :UInt16;
+    tocWeek @42 :UInt16;
   }
 
   struct IonoData {
@@ -1391,6 +1485,49 @@ struct UbloxGnss {
       configpins @3;
       flash @4;
     }
+  }
+
+  struct GlonassEphemeris {
+    svId @0 :UInt16;
+    year @1 :UInt16;
+    dayInYear @2 :UInt16;
+    hour @3 :UInt16;
+    minute @4 :UInt16;
+    second @5 :Float32;
+
+    x @6 :Float64;
+    xVel @7 :Float64;
+    xAccel @8 :Float64;
+    y @9 :Float64;
+    yVel @10 :Float64;
+    yAccel @11 :Float64;
+    z @12 :Float64;
+    zVel @13 :Float64;
+    zAccel @14 :Float64;
+
+    svType @15 :UInt8;
+    svURA @16 :Float32;
+    age @17 :UInt8;
+
+    svHealth @18 :UInt8;
+    tkDEPRECATED @19 :UInt16;
+    tb @20 :UInt16;
+
+    tauN @21 :Float64;
+    deltaTauN @22 :Float64;
+    gammaN @23 :Float64;
+
+    p1 @24 :UInt8;
+    p2 @25 :UInt8;
+    p3 @26 :UInt8;
+    p4 @27 :UInt8;
+
+    freqNumDEPRECATED @28 :UInt32;
+
+    n4 @29 :UInt8;
+    nt @30 :UInt16;
+    freqNum @31 :Int16;
+    tkSeconds @32 :UInt32;
   }
 }
 
@@ -2041,6 +2178,7 @@ struct Event {
     carControl @23 :Car.CarControl;
     longitudinalPlan @24 :LongitudinalPlan;
     lateralPlan @64 :LateralPlan;
+    uiPlan @106 :UiPlan;
     ubloxGnss @34 :UbloxGnss;
     ubloxRaw @39 :Data;
     qcomGnss @31 :QcomGnss;
